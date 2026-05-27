@@ -1,0 +1,230 @@
+
+<div style="padding: 1rem 0;">
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 12px; color: var(--color-text-secondary);">
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 24px; height: 3px; background: #378ADD; display:inline-block; border-radius:2px;"></span>Cobertura vegetal</span>
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 24px; height: 2px; background: #E24B4A; display:inline-block;"></span>Incendio</span>
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 24px; height: 2px; background: #7F77DD; display:inline-block;"></span>Deforestación</span>
+  <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 20px; height: 12px; background: rgba(29,158,117,0.15); border: 1px dashed #1D9E75; display:inline-block;"></span>Ventana probable de plantación</span>
+</div>
+
+<div style="position: relative; width: 100%; height: 340px;">
+  <canvas id="ndviChart" role="img" aria-label="Gráfica de cobertura vegetal NDVI de enero 2019 a mayo 2026 en predio de San Gabriel, Jalisco. Bosque con NDVI de 0.57 en enero 2019, caídas por incendios en 2019, deforestación en abril 2021 con caída a 0.05, ventana probable de plantación entre abril 2021 y diciembre 2022, y recuperación gradual hasta 0.60 en 2025-2026.">Cobertura vegetal desde 2019 hasta 2026 con eventos clave marcados.</canvas>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 1.5rem;">
+  <div style="padding: 0.75rem 1rem; border-left: 3px solid #E24B4A;">
+    <p style="margin: 0 0 2px; font-size: 11px; color: var(--color-text-secondary);">2019</p>
+    <p style="margin: 0; font-size: 12px; font-weight: 500; color: var(--color-text-primary);">Incendios forestales</p>
+    <p style="margin: 3px 0 0; font-size: 11px; color: var(--color-text-secondary);">Río Salsipuedes se desborda. Autoridades prometen proteger la zona.</p>
+  </div>
+  <div style="padding: 0.75rem 1rem; border-left: 3px solid #7F77DD;">
+    <p style="margin: 0 0 2px; font-size: 11px; color: var(--color-text-secondary);">Abr 2021</p>
+    <p style="margin: 0; font-size: 12px; font-weight: 500; color: var(--color-text-primary);">Deforestación total</p>
+    <p style="margin: 3px 0 0; font-size: 11px; color: var(--color-text-secondary);">El bosque desaparece en semanas. NDVI cae de 0.34 a 0.05.</p>
+  </div>
+  <div style="padding: 0.75rem 1rem; border-left: 3px solid #1D9E75;">
+    <p style="margin: 0 0 2px; font-size: 11px; color: var(--color-text-secondary);">2021–2022</p>
+    <p style="margin: 0; font-size: 12px; font-weight: 500; color: var(--color-text-primary);">Ventana probable de plantación</p>
+    <p style="margin: 3px 0 0; font-size: 11px; color: var(--color-text-secondary);">El satélite no determina la fecha exacta. Confirmado por imagen de Google Earth.</p>
+  </div>
+  <div style="padding: 0.75rem 1rem; border-left: 3px solid #BA7517;">
+    <p style="margin: 0 0 2px; font-size: 11px; color: var(--color-text-secondary);">2023–2026</p>
+    <p style="margin: 0; font-size: 12px; font-weight: 500; color: var(--color-text-primary);">Huerta en producción</p>
+    <p style="margin: 3px 0 0; font-size: 11px; color: var(--color-text-secondary);">Picos anuales en lluvias confirman aguacate comercial establecido.</p>
+  </div>
+</div>
+
+<p style="margin: 1rem 0 0; font-size: 11px; color: var(--color-text-secondary);">Fuente: Sentinel-2 / Copernicus (ESA) · Google Earth Engine · Coordenadas: 19.7741°N, 103.6577°O · San Gabriel, Jalisco</p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<script>
+const labels = [
+  'Ene 2019','Feb 2019','Mar 2019','Abr 2019','May 2019','Jun 2019',
+  'Jul 2019','Ago 2019','Sep 2019','Oct 2019','Nov 2019','Dic 2019',
+  'Ene 2020','Feb 2020','Mar 2020','Abr 2020','May 2020','Jun 2020',
+  'Jul 2020','Ago 2020','Sep 2020','Oct 2020','Nov 2020','Dic 2020',
+  'Ene 2021','Feb 2021','Mar 2021','Abr 2021','May 2021','Jun 2021',
+  'Jul 2021','Ago 2021','Sep 2021','Oct 2021','Nov 2021','Dic 2021',
+  'Ene 2022','Feb 2022','Mar 2022','Abr 2022','May 2022','Jun 2022',
+  'Jul 2022','Ago 2022','Sep 2022','Oct 2022','Nov 2022','Dic 2022',
+  'Ene 2023','Feb 2023','Mar 2023','Abr 2023','May 2023','Jun 2023',
+  'Jul 2023','Ago 2023','Sep 2023','Oct 2023','Nov 2023','Dic 2023',
+  'Ene 2024','Feb 2024','Mar 2024','Abr 2024','May 2024','Jun 2024',
+  'Jul 2024','Ago 2024','Sep 2024','Oct 2024','Nov 2024','Dic 2024',
+  'Ene 2025','Feb 2025','Mar 2025','Abr 2025','May 2025','Jun 2025',
+  'Jul 2025','Ago 2025','Sep 2025','Oct 2025','Nov 2025','Dic 2025',
+  'Ene 2026','Feb 2026','Mar 2026','Abr 2026','May 2026'
+];
+
+const data = [
+  0.57,0.40,0.30,0.25,0.08,0.15,
+  0.30,0.35,0.45,0.42,0.38,0.43,
+  0.42,0.38,0.32,0.28,0.25,0.30,
+  0.45,0.50,0.52,0.48,0.42,0.38,
+  0.36,0.34,0.32,0.05,0.08,0.15,
+  0.22,0.25,0.45,0.38,0.30,0.25,
+  0.22,0.20,0.18,0.15,0.25,0.28,
+  0.45,0.42,0.38,0.30,0.27,0.25,
+  0.20,0.18,0.18,0.15,0.18,0.22,
+  0.45,0.43,0.40,0.38,0.35,0.28,
+  0.25,0.20,0.22,0.18,0.20,0.25,
+  0.42,0.40,0.38,0.35,0.30,0.28,
+  0.25,0.22,0.20,0.38,0.52,0.45,
+  0.55,0.60,0.58,0.52,0.48,0.42,
+  0.38,0.30,0.28,0.27,0.28
+];
+
+const idx = l => labels.indexOf(l);
+
+new Chart(document.getElementById('ndviChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Cobertura vegetal (NDVI)',
+      data,
+      borderColor: '#378ADD',
+      backgroundColor: 'rgba(55,138,221,0.07)',
+      borderWidth: 2.5,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => 'NDVI: ' + ctx.parsed.y.toFixed(2)
+        }
+      },
+      annotation: {
+        annotations: {
+          incendio1: {
+            type: 'line',
+            xMin: idx('Ene 2019'), xMax: idx('Ene 2019'),
+            borderColor: '#E24B4A',
+            borderWidth: 2,
+            borderDash: [5,4],
+            label: {
+              display: true,
+              content: '🔥 Incendio',
+              position: 'start',
+              backgroundColor: 'rgba(226,75,74,0.1)',
+              color: '#E24B4A',
+              font: { size: 11, weight: '500' },
+              padding: { x: 6, y: 4 },
+              borderRadius: 4,
+              yAdjust: 55
+            }
+          },
+          incendio2: {
+            type: 'line',
+            xMin: idx('May 2019'), xMax: idx('May 2019'),
+            borderColor: '#E24B4A',
+            borderWidth: 2,
+            borderDash: [5,4],
+            label: {
+              display: true,
+              content: '🔥 Incendio',
+              position: 'start',
+              backgroundColor: 'rgba(226,75,74,0.1)',
+              color: '#E24B4A',
+              font: { size: 11, weight: '500' },
+              padding: { x: 6, y: 4 },
+              borderRadius: 4,
+              yAdjust: 10
+            }
+          },
+          deforestacion: {
+            type: 'line',
+            xMin: idx('Abr 2021'), xMax: idx('Abr 2021'),
+            borderColor: '#7F77DD',
+            borderWidth: 2.5,
+            label: {
+              display: true,
+              content: '🪓 Deforestación',
+              position: 'start',
+              backgroundColor: 'rgba(127,119,221,0.1)',
+              color: '#7F77DD',
+              font: { size: 11, weight: '500' },
+              padding: { x: 6, y: 4 },
+              borderRadius: 4,
+              yAdjust: 10
+            }
+          },
+          ventanaPlantacion: {
+            type: 'box',
+            xMin: idx('Abr 2021'),
+            xMax: idx('Dic 2022'),
+            backgroundColor: 'rgba(29,158,117,0.07)',
+            borderColor: '#1D9E75',
+            borderDash: [4,3],
+            borderWidth: 1,
+            label: {
+              display: true,
+              content: 'Ventana probable de plantación',
+              position: { x: 'center', y: 'start' },
+              color: '#1D9E75',
+              font: { size: 10, weight: '500' },
+              yAdjust: 8
+            }
+          },
+          zonaProtegida: {
+            type: 'box',
+            xMin: idx('Ene 2019'),
+            xMax: idx('Abr 2021'),
+            backgroundColor: 'rgba(55,138,221,0.04)',
+            borderColor: 'transparent',
+            label: {
+              display: true,
+              content: 'Bosque protegido (según autoridades)',
+              position: { x: 'center', y: 'start' },
+              color: 'rgba(55,138,221,0.45)',
+              font: { size: 10 },
+              yAdjust: 8
+            }
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 14,
+          maxRotation: 0,
+          color: '#888780',
+          font: { size: 10 }
+        },
+        grid: { display: false }
+      },
+      y: {
+        min: 0,
+        max: 0.80,
+        ticks: {
+          stepSize: 0.2,
+          color: '#888780',
+          font: { size: 11 },
+          callback: v => v.toFixed(1)
+        },
+        grid: { color: 'rgba(136,135,128,0.12)' },
+        title: {
+          display: true,
+          text: 'Vegetación activa →',
+          color: '#888780',
+          font: { size: 10 }
+        }
+      }
+    }
+  }
+});
+</script>
